@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from src.scorer import Scorer
@@ -6,7 +5,9 @@ from matplotlib import pyplot as plt
 import envs
 
 data_path = f'{envs.project_path}/data'
-df = pd.read_excel(f'{data_path}/AUT_Bedsheet.xlsx')
+df = pd.read_csv(f'{data_path}/AUT_Bedsheet.csv')
+# df.to_csv(f'{data_path}/AUT_Bedsheet.csv', encoding='utf-8-sig')
+
 df = df.fillna('')
 columns = [_ for _ in df.columns if _.startswith('Bedsheet')]
 
