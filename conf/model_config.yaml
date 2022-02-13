@@ -1,0 +1,20 @@
+bert_avg:
+  model_name: bert-base-chinese
+  pool: last_avg
+
+sentence_bert:
+  model_name: paraphrase-multilingual-MiniLM-L12-v2
+  pool: last_avg
+
+bert_whitening_last_avg:
+  model_name: bert-base-chinese
+  pool: last_avg
+  transform: whitening
+
+bert_whitening_first_last_avg:
+  model_name: bert-base-chinese
+  transform: whitening
+
+sim_cse:
+  model_name: bert-base-chinese
+  pool: cls

@@ -65,7 +65,7 @@ def get_pearson_spearson(labels: dict):
     spearson = pd.DataFrame(columns=columns)
     for rater1, label1 in labels.items():
         for rater2, label2 in labels.items():
-            person.loc[rater1, rater2] = metric.get_pearman_corr(label1, label2)
+            person.loc[rater1, rater2] = metric.get_pearson_corr(label1, label2)
             spearson.loc[rater1, rater2] = metric.get_spearman_corr(label1, label2)
     return person, spearson
 
@@ -74,6 +74,7 @@ data_path = f'{envs.project_path}/data'
 out = {}
 # model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
 
 for item in ['床单', '拖鞋', '牙刷', '筷子'][:1]:
     file_path = f'{data_path}/{item}_raters.csv'
@@ -84,6 +85,6 @@ for item in ['床单', '拖鞋', '牙刷', '筷子'][:1]:
     labels.update({k: v for k, v in data.items() if k.startswith('Rater')})
     person, spearson = get_pearson_spearson(labels)
     # out[item] = {'pearson': pearson,
-    #              'spearson': spearson}
+    #              'spearman': spearman}
 
 
