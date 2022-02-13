@@ -1,10 +1,11 @@
 from collections import defaultdict
 
 import pandas as pd
-from sentence_transformers import SentenceTransformer, util
 
 import envs
-from src import metric
+from sentence_transformers import util
+from src import metric, utils
+from src.simcse.task import CSETask
 
 
 def load_data(path):
@@ -65,26 +66,37 @@ def get_pearson_spearson(labels: dict):
     spearson = pd.DataFrame(columns=columns)
     for rater1, label1 in labels.items():
         for rater2, label2 in labels.items():
-            person.loc[rater1, rater2] = metric.get_pearman_corr(label1, label2)
+            person.loc[rater1, rater2] = metric.get_pearson_corr(label1, label2)
             spearson.loc[rater1, rater2] = metric.get_spearman_corr(label1, label2)
     return person, spearson
 
 
 data_path = f'{envs.project_path}/data'
 out = {}
-# model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
+tokenizer, model = utils.build_model('bert-base-chinese')
+task = CSETask.load_from_checkpoint(r'/models/lightning_logs/version_4/checkpoints/epoch=9-step=689.ckpt')
+model = task.encoder.backbone.to('cuda')
 
 for item in ['床单', '拖鞋', '牙刷', '筷子'][:1]:
+    # pooling = 'last_avg'
+    pooling = 'first_last_avg'
+
     file_path = f'{data_path}/{item}_raters.csv'
     data = load_data_2(file_path)
-    cos_sim = get_cos_sim(model=model, target=item, sents=data['sent'])
+
+    sents = data['sent']
+    target = [item]
+    sents_vec = utils.sents_to_vecs(sents=sents, tokenizer=tokenizer, model=model, pooling=pooling, max_length=512)
+    target_vec = utils.sents_to_vecs(sents=target, tokenizer=tokenizer, model=model, pooling=pooling, max_length=512)
+    # kernel, bias = utils.compute_kernel_bias(sents_vec)
+    # # kernel = kernel[:, :250]
+    # sents_vec = utils.transform_and_normalize(sents_vec, kernel, bias)
+    # target_vec = utils.transform_and_normalize(target_vec, kernel, bias)
+    cos_sim = util.cos_sim(sents_vec, target_vec).squeeze(-1).tolist()
 
     labels = {'model': cos_sim}
     labels.update({k: v for k, v in data.items() if k.startswith('Rater')})
     person, spearson = get_pearson_spearson(labels)
     # out[item] = {'pearson': pearson,
-    #              'spearson': spearson}
-
-
+    #              'spearman': spearman}
