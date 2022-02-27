@@ -1,3 +1,5 @@
+import os.path
+from argparse import ArgumentParser
 from collections import defaultdict
 
 import pandas as pd
@@ -18,46 +20,53 @@ def get_pearson_spearson(labels: dict):
     return pearson, spearman
 
 
-data_path = f'{envs.project_path}/data'
-out_path = f'{envs.project_path}/outputs'
-out = {}
+if __name__ == '__main__':
+    # config
+    data_path = f'{envs.project_path}/data'
+    out_path = f'{envs.project_path}/outputs'
 
-file_path = f'{out_path}/sjm_out_1.csv'
-# file_path = f'{out_path}/pku_out_1.csv'
+    parser = ArgumentParser()
+    parser.add_argument('--input_file', default='pku_out_2.csv')
+    args = parser.parse_args()
 
-df_in = pd.read_csv(file_path)
-rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
-df_in.dropna(axis=0, how='any', inplace=True)
-df_in[rater_list] = df_in[rater_list].astype('float')
+    file_path = os.path.join(out_path, args.input_file)
+    out = {}
+    # file_path = f'{out_path}/sjm_out_2.csv'
+    # file_path = f'{out_path}/pku_out_1.csv'
 
-item_list = list(set(df_in['Item'].tolist()))
+    df_in = pd.read_csv(file_path)
+    rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
+    df_in.dropna(axis=0, how='any', inplace=True)
+    df_in[rater_list] = df_in[rater_list].astype('float')
 
-data = defaultdict(lambda: defaultdict(list))
-usage_dict = defaultdict(set)
-inappropriate = defaultdict(set)
-for i, line in df_in.iterrows():
-    _item = line['Item']
-    _usage = line['Usage']
-    _rID = line['ResponseID']
-    _sID = line['SubID']
-    _raters = []
-    for _rater in rater_list:
-        score = line[_rater]
+    item_list = list(set(df_in['Item'].tolist()))
 
-        data[_item][_rater].append({
-            'usage': _usage,
-            'usage_len': len(_usage),
-            'rID': _rID,
-            'sID': _sID,
-            'score': score,
-        })
+    data = defaultdict(lambda: defaultdict(list))
+    usage_dict = defaultdict(set)
+    inappropriate = defaultdict(set)
+    for i, line in df_in.iterrows():
+        _item = line['Item']
+        _usage = line['Usage']
+        _rID = line['ResponseID']
+        _sID = line['SubID']
+        _raters = []
+        for _rater in rater_list:
+            score = line[_rater]
 
-scores = {item: {rater: [_['score'] for _ in v]
-                 for rater, v in d.items()}
-          for item, d in data.items()}
+            data[_item][_rater].append({
+                'usage': _usage,
+                'usage_len': len(_usage),
+                'rID': _rID,
+                'sID': _sID,
+                'score': score,
+            })
 
-pearson_dict, spearman_dict = {}, {}
-for item, score in scores.items():
-    pearson, spearman = get_pearson_spearson(score)
-    pearson_dict[item] = pearson
-    spearman_dict[item] = spearman
+    scores = {item: {rater: [_['score'] for _ in v]
+                     for rater, v in d.items()}
+              for item, d in data.items()}
+
+    pearson_dict, spearman_dict = {}, {}
+    for item, score in scores.items():
+        pearson, spearman = get_pearson_spearson(score)
+        pearson_dict[item] = pearson
+        spearman_dict[item] = spearman
