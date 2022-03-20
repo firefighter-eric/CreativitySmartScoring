@@ -2,6 +2,7 @@ import os.path
 import re
 from collections import defaultdict
 
+import numpy as np
 import pandas as pd
 from sentence_transformers import util
 
@@ -39,7 +40,9 @@ def get_pearson_spearson(labels: dict):
     return person, spearson
 
 
-def process(model_name):
+def process(model_name, tag=''):
+    print(f'{model_name}')
+    model = None
     if 'whitening' not in model_name:
         model = get_model(model_name)
     out = dict()
@@ -47,7 +50,7 @@ def process(model_name):
         usages = list(usages)
         if 'whitening' in model_name:
             model = get_model(model_name, usages)
-        cos_sim = get_cos_sim(model=model, target=item, sents=usages).tolist()
+        cos_sim = get_cos_sim(model=model, target=item + tag, sents=usages).tolist()
         out[item] = {u: s for u, s in zip(usages, cos_sim)}
 
     df_scores = []
@@ -56,35 +59,23 @@ def process(model_name):
         usage = line['Usage']
         df_scores.append(out[item][usage])
 
-    df_out[f'Rater_{model_name}'] = df_scores
+    df_scores = 1 - np.array(df_scores)
+    df_out[f'Rater_{model_name}_{tag}'] = df_scores
 
-    # 加'的用途'
-    out = dict()
-    for item, usages in usage_dict.items():
-        usages = list(usages)
-        if 'whitening' in model_name:
-            model = get_model(model_name, usages)
-        cos_sim = get_cos_sim(model=model, target=item + '的用途', sents=usages).tolist()
-        out[item] = {u: s for u, s in zip(usages, cos_sim)}
 
-    df_scores = []
-    for _, line in df_in.iterrows():
-        item = line['Item']
-        usage = line['Usage']
-        df_scores.append(out[item][usage])
-
-    df_out[f'Rater_{model_name}_的用途'] = df_scores
+def get_args():
+    parser = ArgumentParser()
+    parser.add_argument('--input_file', default='pku_raw.csv')
+    parser.add_argument('--output_file', default='pku_out_1.csv')
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == '__main__':
     # config
     data_path = f'{envs.project_path}/data'
     out_path = f'{envs.project_path}/outputs'
-
-    parser = ArgumentParser()
-    parser.add_argument('--input_file', default='pku_raw.csv')
-    parser.add_argument('--output_file', default='pku_out_2.csv')
-    args = parser.parse_args()
+    args = get_args()
     file_path = os.path.join(data_path, args.input_file)
     out_file_path = os.path.join(out_path, args.output_file)
 
@@ -96,11 +87,9 @@ if __name__ == '__main__':
     df_in = pd.read_csv(file_path)
     df_in['Usage'] = df_in.apply(lambda row: filter_by(row['Item'], row['Usage']), axis=1)
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
-    df_out = df_in.copy()
 
     data = defaultdict(list)
     usage_dict = defaultdict(set)
-    inappropriate = defaultdict(set)
     for i, line in df_in.iterrows():
         _item = line['Item']
         _usage = line['Usage']
@@ -123,4 +112,9 @@ if __name__ == '__main__':
     model_name = ['sbert', 'word2vec', 'bert_whitening']
     for _ in model_name[2:]:
         process(_)
+    for _ in model_name[2:]:
+        process(_, tag='的用途')
+
+    # output
+    df_out = df_in.copy()
     df_out.to_csv(out_file_path, index=False)

@@ -20,20 +20,22 @@ def get_pearson_spearson(labels: dict):
     return pearson, spearman
 
 
+def get_args():
+    parser = ArgumentParser()
+    parser.add_argument('--input_file', default='pku_out_1.csv')
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == '__main__':
     # config
     data_path = f'{envs.project_path}/data'
     out_path = f'{envs.project_path}/outputs'
-
-    parser = ArgumentParser()
-    parser.add_argument('--input_file', default='pku_out_2.csv')
-    args = parser.parse_args()
-
+    args = get_args()
     file_path = os.path.join(out_path, args.input_file)
     out = {}
-    # file_path = f'{out_path}/sjm_out_2.csv'
-    # file_path = f'{out_path}/pku_out_1.csv'
 
+    # data
     df_in = pd.read_csv(file_path)
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
     df_in.dropna(axis=0, how='any', inplace=True)
@@ -65,6 +67,7 @@ if __name__ == '__main__':
                      for rater, v in d.items()}
               for item, d in data.items()}
 
+    # pearson, spearman
     pearson_dict, spearman_dict = {}, {}
     for item, score in scores.items():
         pearson, spearman = get_pearson_spearson(score)
