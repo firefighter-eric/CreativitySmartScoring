@@ -59,14 +59,13 @@ def process(model_name, tag=''):
         usage = line['Usage']
         df_scores.append(out[item][usage])
 
-    df_scores = 1 - np.array(df_scores)
     df_out[f'Rater_{model_name}_{tag}'] = df_scores
 
 
 def get_args():
     parser = ArgumentParser()
     parser.add_argument('--input_file', default='pku_raw.csv')
-    parser.add_argument('--output_file', default='pku_out_1.csv')
+    parser.add_argument('--output_file', default='pku_out.csv')
     args = parser.parse_args()
     return args
 
@@ -87,6 +86,7 @@ if __name__ == '__main__':
     df_in = pd.read_csv(file_path)
     df_in['Usage'] = df_in.apply(lambda row: filter_by(row['Item'], row['Usage']), axis=1)
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
+    df_out = df_in.copy()
 
     data = defaultdict(list)
     usage_dict = defaultdict(set)
@@ -109,12 +109,13 @@ if __name__ == '__main__':
         })
 
     # model process
-    model_name = ['sbert', 'word2vec', 'bert_whitening']
-    for _ in model_name[2:]:
+    model_name = ['sbert', 'word2vec', 'bert_whitening', 'simcse']
+    # model_name = ['simcse']
+    for _ in model_name:
         process(_)
-    for _ in model_name[2:]:
+    for _ in model_name:
         process(_, tag='的用途')
 
     # output
-    df_out = df_in.copy()
+
     df_out.to_csv(out_file_path, index=False)
