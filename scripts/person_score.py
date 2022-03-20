@@ -17,12 +17,16 @@ def get_pearson_spearson(labels: dict):
         for rater2, score2 in labels.items():
             pearson.loc[rater1, rater2] = metric.get_pearson_corr(score1, score2)
             spearman.loc[rater1, rater2] = metric.get_spearman_corr(score1, score2)
+    pearson = pearson.abs()
+    spearman = spearman.abs()
+    pearson['mean'] = pearson.mean()
+    spearman['mean'] = spearman.mean()
     return pearson, spearman
 
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument('--input_file', default='pku_out_1.csv')
+    parser.add_argument('--input_file', default='pku_out.csv')
     args = parser.parse_args()
     return args
 
@@ -73,3 +77,4 @@ if __name__ == '__main__':
         pearson, spearman = get_pearson_spearson(score)
         pearson_dict[item] = pearson
         spearman_dict[item] = spearman
+
