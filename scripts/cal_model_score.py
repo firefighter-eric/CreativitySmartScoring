@@ -1,15 +1,14 @@
 import os.path
 import re
+from argparse import ArgumentParser
 from collections import defaultdict
 
-import numpy as np
 import pandas as pd
 from sentence_transformers import util
 
 import envs
 from src import metric
 from src.get_model import get_model
-from argparse import ArgumentParser
 
 
 def filter_by(item, usage):
@@ -59,13 +58,17 @@ def process(model_name, tag=''):
         usage = line['Usage']
         df_scores.append(out[item][usage])
 
-    df_out[f'Rater_{model_name}_{tag}'] = df_scores
+    column_name = f'Rater_{model_name}'
+    column_name += f'_{tag}' if tag else ''
+    df_out[column_name] = df_scores
 
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument('--input_file', default='pku_raw.csv')
-    parser.add_argument('--output_file', default='pku_out.csv')
+    # parser.add_argument('--input_file', default='pku_raw.csv')
+    # parser.add_argument('--output_file', default='pku_out.csv')
+    parser.add_argument('--input_file', default='sjm_raw.csv')
+    parser.add_argument('--output_file', default='sjm_out.csv')
     args = parser.parse_args()
     return args
 
@@ -109,13 +112,12 @@ if __name__ == '__main__':
         })
 
     # model process
-    model_name = ['sbert', 'word2vec', 'bert_whitening', 'simcse']
-    # model_name = ['simcse']
+    model_name = ['word2vec', 'bert', 'bert_whitening', 'sbert_mpnet', 'sbert_minilm', 'simcse_cyclone']
+    # model_name = ['simcse_uer']
     for _ in model_name:
         process(_)
     for _ in model_name:
         process(_, tag='的用途')
 
     # output
-
     df_out.to_csv(out_file_path, index=False)

@@ -19,14 +19,15 @@ def get_pearson_spearson(labels: dict):
             spearman.loc[rater1, rater2] = metric.get_spearman_corr(score1, score2)
     pearson = pearson.abs()
     spearman = spearman.abs()
-    pearson['mean'] = pearson.mean()
-    spearman['mean'] = spearman.mean()
+    pearson['mean'] = pearson[['Rater1', 'Rater2', 'Rater3', 'Rater4']].mean(axis=1)
+    spearman['mean'] = spearman[['Rater1', 'Rater2', 'Rater3', 'Rater4']].mean(axis=1)
     return pearson, spearman
 
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument('--input_file', default='pku_out.csv')
+    # parser.add_argument('--input_file', default='pku_out.csv')
+    parser.add_argument('--input_file', default='sjm_out.csv')
     args = parser.parse_args()
     return args
 

@@ -33,7 +33,7 @@ def sent_to_vec(sent, tokenizer, model, pooling, max_length):
         elif pooling == 'cls':
             output_hidden_state = (hidden_states[-1])[:, 0, :]
         else:
-            raise Exception("unknown pooling {}".format(POOLING))
+            raise Exception("unknown pooling {}".format(pooling))
 
         vec = output_hidden_state.cpu().numpy()[0]
     return vec
