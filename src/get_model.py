@@ -19,8 +19,8 @@ class Word2vec:
 
 
 class Sbert:
-    def __init__(self):
-        self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device='cuda')
+    def __init__(self, path):
+        self.model = SentenceTransformer(path, device='cuda')
 
     def __call__(self, x):
         return self.model.encode(x)
@@ -92,9 +92,17 @@ class SimCSEPipeLine:
 def get_model(model_name, *args):
     if model_name == 'word2vec':
         return Word2vec()
-    elif model_name == 'sbert':
-        return Sbert()
+    elif model_name == 'sbert_minilm':
+        return Sbert(path='paraphrase-multilingual-MiniLM-L12-v2')
+    elif model_name == 'sbert_mpnet':
+        return Sbert(path='paraphrase-multilingual-mpnet-base-v2')
+    elif model_name == 'simcse_cyclone':
+        return Sbert(path='cyclone/simcse-chinese-roberta-wwm-ext')
+    elif model_name == 'simcse_uer':
+        return Sbert(path='uer/simcse-base-chinese')
+    elif model_name == 'bert':
+        return Sbert(path='bert-base-chinese')
     elif model_name == 'bert_whitening':
         return BertWhitening(*args)
-    elif model_name == 'simcse':
+    elif model_name == 'simcse_':
         return SimCSEPipeLine()
