@@ -87,6 +87,7 @@ if __name__ == '__main__':
     # load data
     out = {}
     df_in = pd.read_csv(file_path)
+    df_in = df_in.dropna(how='any')
     df_in['Usage'] = df_in.apply(lambda row: filter_by(row['Item'], row['Usage']), axis=1)
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
     df_out = df_in.copy()

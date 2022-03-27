@@ -42,6 +42,7 @@ if __name__ == '__main__':
 
     # data
     df_in = pd.read_csv(file_path)
+    df_in = df_in.dropna(how='all')
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
     df_in.dropna(axis=0, how='any', inplace=True)
     df_in[rater_list] = df_in[rater_list].astype('float')
