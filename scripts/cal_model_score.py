@@ -2,11 +2,11 @@ import os.path
 import re
 from argparse import ArgumentParser
 from collections import defaultdict
+from os.path import dirname
 
 import pandas as pd
 from sentence_transformers import util
 
-import envs
 from src import metric
 from src.get_model import get_model
 
@@ -75,8 +75,8 @@ def get_args():
 
 if __name__ == '__main__':
     # config
-    data_path = f'{envs.project_path}/data'
-    out_path = f'{envs.project_path}/outputs'
+    data_path = 'data'
+    out_path = 'outputs'
     args = get_args()
     file_path = os.path.join(data_path, args.input_file)
     out_file_path = os.path.join(out_path, args.output_file)
@@ -113,12 +113,15 @@ if __name__ == '__main__':
         })
 
     # model process
-    model_name = ['word2vec', 'bert', 'bert_whitening', 'sbert_mpnet', 'sbert_minilm', 'simcse_cyclone']
+    # model_name = ['word2vec', 'bert', 'bert_whitening', 'sbert_mpnet', 'sbert_minilm', 'simcse_cyclone']
     # model_name = ['simcse_uer']
+    model_name = ['simcse_cyclone']
+    # model_name = ['sbert_minilm']
     for _ in model_name:
         process(_)
     for _ in model_name:
         process(_, tag='的用途')
 
     # output
-    df_out.to_csv(out_file_path, index=False)
+    os.makedirs(dirname(out_file_path), exist_ok=True)
+    df_out.to_csv(out_file_path, index=False, encoding='utf-8-sig')

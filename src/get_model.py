@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from fasttext import FastText
+
 from sentence_transformers import SentenceTransformer
 from torch import nn
 from transformers import AutoModel, BertTokenizer
@@ -10,6 +10,7 @@ from src import bert_whitening_utils as utils
 
 class Word2vec:
     def __init__(self):
+        from fasttext import FastText
         self.model = FastText.load_model('C:\Projects\CreativitySmartScoring\models\word2vec\cc.zh.300.bin')
 
     def __call__(self, x):
