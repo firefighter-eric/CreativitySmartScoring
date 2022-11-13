@@ -1,5 +1,4 @@
 import os.path
-import re
 from argparse import ArgumentParser
 from collections import defaultdict
 from os.path import dirname
@@ -9,15 +8,7 @@ from sentence_transformers import util
 
 from src import metric
 from src.get_model import get_model
-
-
-def filter_by(item, usage):
-    stop_words = f'当作|当|用|{item}'
-    tmp = re.sub(stop_words, '', usage)
-    if tmp:
-        return re.sub(item, '', usage)
-    else:
-        return usage
+from src.utils import remove_stopwords
 
 
 def get_cos_sim(model, target, sents):
@@ -65,30 +56,25 @@ def process(model_name, tag=''):
 
 def get_args():
     parser = ArgumentParser()
-    # parser.add_argument('--input_file', default='pku_raw.csv')
-    # parser.add_argument('--output_file', default='pku_out.csv')
-    parser.add_argument('--input_file', default='sjm_raw.csv')
-    parser.add_argument('--output_file', default='sjm_out.csv')
+    # parser.add_argument('--input_path', default='data/pku_raw.csv')
+    # parser.add_argument('--output_path', default='outputs/pku_out.csv')
+    parser.add_argument('--input_path', default='data/sjm_raw.csv')
+    parser.add_argument('--output_path', default='outputs/sjm_out.csv')
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
     # config
-    data_path = 'data'
-    out_path = 'outputs'
     args = get_args()
-    file_path = os.path.join(data_path, args.input_file)
-    out_file_path = os.path.join(out_path, args.output_file)
-
-    # file_path = f'{data_path}/sjm_raw.csv'
-    # out_file_path = f'{out_path}/sjm_out_2.csv'
+    input_path = args.input_path
+    output_path = args.output_path
 
     # load data
     out = {}
-    df_in = pd.read_csv(file_path)
+    df_in = pd.read_csv(input_path)
     df_in = df_in.dropna(how='any')
-    df_in['Usage'] = df_in.apply(lambda row: filter_by(row['Item'], row['Usage']), axis=1)
+    df_in['Usage'] = df_in.apply(lambda row: remove_stopwords(row['Item'], row['Usage']), axis=1)
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
     df_out = df_in.copy()
 
@@ -116,12 +102,11 @@ if __name__ == '__main__':
     # model_name = ['word2vec', 'bert', 'bert_whitening', 'sbert_mpnet', 'sbert_minilm', 'simcse_cyclone']
     # model_name = ['simcse_uer']
     model_name = ['simcse_cyclone']
-    # model_name = ['sbert_minilm']
     for _ in model_name:
         process(_)
     for _ in model_name:
         process(_, tag='的用途')
 
     # output
-    os.makedirs(dirname(out_file_path), exist_ok=True)
-    df_out.to_csv(out_file_path, index=False, encoding='utf-8-sig')
+    os.makedirs(dirname(output_path), exist_ok=True)
+    # df_out.to_csv(output_path, index=False, encoding='utf-8-sig')

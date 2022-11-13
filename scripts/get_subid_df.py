@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # sub_df = df.groupby('SubID')[raters].mean()
 
     # sub_df.insert(0, 'SubID', sub_df.index)
-    # sub_df.to_csv(out_file_path, index=False)
+    # sub_df.to_csv(output_path, index=False)
     items = sorted(set(df['Item']))
     sub_ids = sorted(set(df['SubID']))
     data = defaultdict(lambda: defaultdict(list))
