@@ -107,3 +107,5 @@ def get_model(model_name, *args):
         return BertWhitening(*args)
     elif model_name == 'simcse_':
         return SimCSEPipeLine()
+    else:
+        return Sbert(path=model_name)
