@@ -58,8 +58,9 @@ def get_args():
     parser = ArgumentParser()
     # parser.add_argument('--input_path', default='data/pku_raw.csv')
     # parser.add_argument('--output_path', default='outputs/pku_out.csv')
-    parser.add_argument('--input_path', default='data/sjm_raw.csv')
-    parser.add_argument('--output_path', default='outputs/sjm_out.csv')
+    parser.add_argument('--input_path', '-i', default='data/sjm_raw.csv')
+    parser.add_argument('--output_path', '-o', default='outputs/sjm_out.csv')
+    parser.add_argument('--dry_run', action='store_true', default=False)
     args = parser.parse_args()
     return args
 
@@ -72,7 +73,12 @@ if __name__ == '__main__':
 
     # load data
     out = {}
-    df_in = pd.read_csv(input_path)
+    if input_path.endswith('.csv'):
+        df_in = pd.read_csv(input_path)
+    elif input_path.endswith('.xlsx'):
+        df_in = pd.read_excel(input_path)
+    else:
+        raise NotImplementedError
     df_in = df_in.dropna(how='any')
     df_in['Usage'] = df_in.apply(lambda row: remove_stopwords(row['Item'], row['Usage']), axis=1)
     rater_list = [_ for _ in df_in.columns if _.startswith('Rater')]
@@ -101,12 +107,16 @@ if __name__ == '__main__':
     # model process
     # model_name = ['word2vec', 'bert', 'bert_whitening', 'sbert_mpnet', 'sbert_minilm', 'simcse_cyclone']
     # model_name = ['simcse_uer']
-    model_name = ['simcse_cyclone']
+    # model_name = ['simcse_cyclone']
+    model_name = ['word2vec']
     for _ in model_name:
         process(_)
     for _ in model_name:
         process(_, tag='的用途')
 
     # output
-    os.makedirs(dirname(output_path), exist_ok=True)
-    # df_out.to_csv(output_path, index=False, encoding='utf-8-sig')
+    if not args.dry_run:
+        os.makedirs(dirname(output_path), exist_ok=True)
+        df_out.to_csv(output_path, index=False, encoding='utf-8-sig')
+
+# python -m scripts.cal_model_score -i data/sjm_raw.csv -o outputs/sjm_out.csv

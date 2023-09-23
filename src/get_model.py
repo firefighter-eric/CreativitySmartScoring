@@ -1,6 +1,7 @@
+from typing import List
+
 import numpy as np
 import torch
-
 from sentence_transformers import SentenceTransformer
 from torch import nn
 from transformers import AutoModel, BertTokenizer
@@ -13,7 +14,8 @@ class Word2vec:
         from fasttext import FastText
         self.model = FastText.load_model('C:\Projects\CreativitySmartScoring\models\word2vec\cc.zh.300.bin')
 
-    def __call__(self, x):
+    def __call__(self, x: List[str]):
+        x = [_.replace(' ', '') for _ in x]
         v = [self.model.get_word_vector(_) for _ in x]
         v = np.vstack(v)
         return v
@@ -28,10 +30,9 @@ class Sbert:
 
 
 class BertWhitening:
-    tokenizer, model = utils.build_model('bert-base-chinese')
-
     def __init__(self, sents, pooling='last_avg'):
         self.pooling = pooling
+        self.tokenizer, self.model = utils.build_model('bert-base-chinese')
         sents_vec = utils.sents_to_vecs(sents=sents, tokenizer=self.tokenizer, model=self.model,
                                         pooling=self.pooling, max_length=512)
         self.kernel, self.bias = utils.compute_kernel_bias(sents_vec)
