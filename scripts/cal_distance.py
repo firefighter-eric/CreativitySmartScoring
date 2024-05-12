@@ -1,7 +1,7 @@
 from sentence_transformers import util
 from tqdm import tqdm
 
-from src.get_model import get_model
+from css.get_model import get_model
 import pandas as pd
 from envs import project_path
 from os.path import join

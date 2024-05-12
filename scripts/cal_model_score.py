@@ -6,9 +6,9 @@ from os.path import dirname
 import pandas as pd
 from sentence_transformers import util
 
-from src import metric
-from src.get_model import get_model
-from src.utils import remove_stopwords
+from css import metric
+from css.get_model import get_model
+from css.utils import remove_stopwords
 
 
 def get_cos_sim(model, target, sents):

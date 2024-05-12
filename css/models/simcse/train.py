@@ -1,10 +1,10 @@
 import pytorch_lightning as pl
 
-from src.simcse import args
-from src.simcse.task import CSETask
+from css.models.simcse import args
+from css.models.simcse.task import CSETask
 
 if __name__ == '__main__':
-    from src.simcse.dataloader import get_dataloader
+    from css.models.simcse.dataloader import get_dataloader
 
     train_args = args.TrainArgs
     train_dataloader, dev_dataloader = get_dataloader(train_args)

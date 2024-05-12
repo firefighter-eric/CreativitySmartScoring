@@ -5,7 +5,7 @@ import pandas as pd
 from sentence_transformers import util, SentenceTransformer
 
 import envs
-from src import metric
+from css import metric
 
 
 def filter_by(item, usage):

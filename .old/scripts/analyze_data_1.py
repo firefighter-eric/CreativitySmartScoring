@@ -1,6 +1,6 @@
 import pandas as pd
 from sentence_transformers import SentenceTransformer
-from src.scorer import Scorer
+from css.scorer import Scorer
 from matplotlib import pyplot as plt
 import envs
 

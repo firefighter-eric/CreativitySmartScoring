@@ -4,9 +4,11 @@ from loguru import logger
 import pandas as pd
 
 # %%
-file_path = 'data/models/tencent-ailab-embedding-zh-d200-v0.2.0-s/tencent-ailab-embedding-zh-d200-v0.2.0-s.txt'
-
-word_vectors = KeyedVectors.load_word2vec_format(file_path, binary=False)
+file_path = 'data/models/word2vec/tencent-ailab-embedding-zh-d100-v0.2.0-s.txt'
+bin_file_path = 'data/models/word2vec/tencent-ailab-embedding-zh-d100-v0.2.0-s.bin'
+# word_vectors = KeyedVectors.load_word2vec_format(file_path, binary=False)
+word_vectors = KeyedVectors.load_word2vec_format(bin_file_path, binary=True)
+# word_vectors.save_word2vec_format( 'data/models/word2vec/tencent-ailab-embedding-zh-d100-v0.2.0-s.bin', binary=True)
 logger.info('model init')
 
 # %%
@@ -16,7 +18,7 @@ similarity = word_vectors.similarity('woman', 'man')
 # %%
 similarity = word_vectors.similarity('中国', '美国')
 v1 = word_vectors.get_vector('woman')
-v1 = word_vectors.get_vector('桌兜')
+# v1 = word_vectors.get_vector('桌兜')
 
 # %%
 

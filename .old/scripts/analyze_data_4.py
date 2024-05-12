@@ -4,8 +4,7 @@ import pandas as pd
 
 import envs
 from sentence_transformers import util, SentenceTransformer
-from src import metric, bert_whitening_utils
-from src.simcse.task import CSETask
+from css import metric
 
 
 def load_data(path):

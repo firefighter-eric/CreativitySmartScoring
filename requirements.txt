@@ -1,7 +1,16 @@
-pandas
 numpy
+pandas
+openpyxl
+scikit-learn
+
+# word2vector
+# fasttext
+gensim
+scipy==1.12.0
+
+torch
 transformers
 sentence-transformers
-scikit-learn
-scipy==1.12.0
+
 loguru
+

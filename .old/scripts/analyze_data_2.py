@@ -4,7 +4,7 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
 import envs
-from src import metric
+from css import metric
 
 
 def load_data(path):

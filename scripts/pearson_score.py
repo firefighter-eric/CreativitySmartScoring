@@ -5,7 +5,7 @@ from collections import defaultdict
 import pandas as pd
 
 import envs
-from src import metric
+from css import metric
 
 
 def get_pearson_spearson(labels: dict):

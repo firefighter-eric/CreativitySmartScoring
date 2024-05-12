@@ -2,8 +2,8 @@ import pickle
 
 import pandas as pd
 
-from src.get_model import get_model
-from src.utils import remove_stopwords
+from css.get_model import get_model
+from css.utils import remove_stopwords
 
 input_path = 'data/pku_raw.csv'
 

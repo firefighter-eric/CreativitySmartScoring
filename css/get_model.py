@@ -6,10 +6,10 @@ from sentence_transformers import SentenceTransformer
 from torch import nn
 from transformers import AutoModel, BertTokenizer
 
-from src import bert_whitening_utils as utils
+from css import bert_whitening_utils as utils
 
 
-class Word2vec:
+class Word2VectorFastText:
     def __init__(self):
         from fasttext import FastText
         self.model = FastText.load_model('C:\Projects\CreativitySmartScoring\models\word2vec\cc.zh.300.bin')
@@ -17,6 +17,17 @@ class Word2vec:
     def __call__(self, x: List[str]):
         x = [_.replace(' ', '') for _ in x]
         v = [self.model.get_word_vector(_) for _ in x]
+        v = np.vstack(v)
+        return v
+
+
+class Word2VectorGensim:
+    def __init__(self, model_name_or_path):
+        from gensim.models import KeyedVectors
+        self.model = KeyedVectors.load_word2vec_format(model_name_or_path, binary=False)
+
+    def __call__(self, x: list[str]):
+        v = [self.model.get_vector(_) for _ in x]
         v = np.vstack(v)
         return v
 
@@ -74,7 +85,7 @@ class SimCSE(nn.Module):
 
 class SimCSEPipeLine:
     def __init__(self):
-        self.tokenizer = BertTokenizer.from_pretrained('../models/chinese_roberta_wwm_ext_pytorch')
+        self.tokenizer = BertTokenizer.from_pretrained('../data/models/chinese_roberta_wwm_ext_pytorch')
         self.model = SimCSE('../models/chinese_roberta_wwm_ext_pytorch', pooling='cls')
         self.model.cuda().eval()
 
@@ -91,9 +102,13 @@ class SimCSEPipeLine:
         return output
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters())
+
+
 def get_model(model_name, *args):
     if model_name == 'word2vec':
-        return Word2vec()
+        return Word2VectorFastText()
     elif model_name == 'sbert_minilm':
         return Sbert(path='paraphrase-multilingual-MiniLM-L12-v2')
     elif model_name == 'sbert_mpnet':
@@ -110,3 +125,8 @@ def get_model(model_name, *args):
         return SimCSEPipeLine()
     else:
         return Sbert(path=model_name)
+
+
+if __name__ == '__main__':
+    _m = Word2VectorGensim('data/models/word2vec/tencent-ailab-embedding-zh-d100-v0.2.0-s.txt')
+    _v = _m(['woman', 'man'])
