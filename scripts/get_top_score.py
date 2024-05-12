@@ -1,16 +1,13 @@
 from collections import defaultdict
-from os.path import join
 from typing import List
 
 import pandas as pd
 
-from envs import project_path
-
 # config path
-# in_path = join(project_path, 'data', 'coco_reversedModel_PKU.xlsx')
-# out_path = join(project_path, 'outputs', 'pku_topk_output.csv')
-in_path = join(project_path, 'data', 'coco_reversedModel_SJM.xlsx')
-out_path = join(project_path, 'outputs', 'sjm_topk_output.csv')
+# in_path = 'data/coco_reversedModel_PKU.xlsx')
+# out_path = 'outputs/pku_topk_output.csv')
+in_path = 'data/coco_reversedModel_SJM.xlsx'
+out_path = 'outputs/sjm_topk_output.csv'
 
 # load data
 df: pd.DataFrame = pd.read_excel(in_path)

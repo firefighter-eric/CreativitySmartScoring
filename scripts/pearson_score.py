@@ -4,7 +4,6 @@ from collections import defaultdict
 
 import pandas as pd
 
-import envs
 from css import metric
 
 
@@ -34,8 +33,8 @@ def get_args():
 
 if __name__ == '__main__':
     # config
-    data_path = f'{envs.project_path}/data'
-    out_path = f'{envs.project_path}/outputs'
+    data_path = 'data'
+    out_path = 'outputs'
     args = get_args()
     file_path = os.path.join(out_path, args.input_file)
     out = {}
@@ -79,4 +78,3 @@ if __name__ == '__main__':
         pearson, spearman = get_pearson_spearson(score)
         pearson_dict[item] = pearson
         spearman_dict[item] = spearman
-

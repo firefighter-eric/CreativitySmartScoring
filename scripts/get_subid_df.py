@@ -5,12 +5,11 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-import envs
 
 if __name__ == '__main__':
     # config
-    data_path = f'{envs.project_path}/data'
-    out_path = f'{envs.project_path}/outputs'
+    data_path = 'data'
+    out_path = 'outputs'
 
     parser = ArgumentParser()
     parser.add_argument('--input_file', default='pku_out.csv')
