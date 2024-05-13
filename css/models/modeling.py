@@ -1,7 +1,9 @@
+import time
 from typing import List
 
 import numpy as np
 import torch
+from loguru import logger
 from sentence_transformers import SentenceTransformer
 from torch import nn
 from transformers import AutoModel, BertTokenizer
@@ -9,8 +11,23 @@ from transformers import AutoModel, BertTokenizer
 from css.models import bert_whitening_utils as utils
 
 
-class Word2VectorFastText:
-    def __init__(self):
+class ModelMixin:
+    def __init__(self, model_name_or_path):
+        t0 = time.time()
+        self.model = None
+        self.load(model_name_or_path)
+        t1 = time.time()
+        logger.info(f'Model loaded in {t1 - t0:.2f} seconds from {model_name_or_path}')
+
+    def load(self, model_name_or_path):
+        pass
+
+    def __call__(self, x: list[str]) -> np.ndarray:
+        pass
+
+
+class Word2VectorFastText(ModelMixin):
+    def load(self, model_name_or_path):
         from fasttext import FastText
         self.model = FastText.load_model('C:\Projects\CreativitySmartScoring\models\word2vec\cc.zh.300.bin')
 
@@ -21,8 +38,8 @@ class Word2VectorFastText:
         return v
 
 
-class Word2VectorGensim:
-    def __init__(self, model_name_or_path):
+class Word2VectorGensim(ModelMixin):
+    def load(self, model_name_or_path):
         from gensim.models import KeyedVectors
         self.model = KeyedVectors.load_word2vec_format(model_name_or_path, binary=False)
 
@@ -32,9 +49,9 @@ class Word2VectorGensim:
         return v
 
 
-class Sbert:
-    def __init__(self, path):
-        self.model = SentenceTransformer(path, device='cuda')
+class Sbert(ModelMixin):
+    def load(self, model_name_or_path):
+        self.model = SentenceTransformer(model_name_or_path, device='cuda')
 
     def __call__(self, x):
         return self.model.encode(x)
@@ -56,9 +73,9 @@ class BertWhitening:
 
 
 class SimCSE(nn.Module):
-    def __init__(self, pretrained_model: str, pooling: str):
+    def __init__(self, model_name_or_path: str, pooling: str):
         super().__init__()
-        self.bert = AutoModel.from_pretrained(pretrained_model)
+        self.bert = AutoModel.from_pretrained(model_name_or_path)
         self.pooling = pooling
 
     def forward(self, input_ids, attention_mask, token_type_ids):
@@ -110,21 +127,21 @@ def get_model(model_name, *args):
     if model_name == 'word2vec':
         return Word2VectorFastText()
     elif model_name == 'sbert_minilm':
-        return Sbert(path='paraphrase-multilingual-MiniLM-L12-v2')
+        return Sbert(model_name_or_path='paraphrase-multilingual-MiniLM-L12-v2')
     elif model_name == 'sbert_mpnet':
-        return Sbert(path='paraphrase-multilingual-mpnet-base-v2')
+        return Sbert(model_name_or_path='paraphrase-multilingual-mpnet-base-v2')
     elif model_name == 'simcse_cyclone':
-        return Sbert(path='cyclone/simcse-chinese-roberta-wwm-ext')
+        return Sbert(model_name_or_path='cyclone/simcse-chinese-roberta-wwm-ext')
     elif model_name == 'simcse_uer':
-        return Sbert(path='uer/simcse-base-chinese')
+        return Sbert(model_name_or_path='uer/simcse-base-chinese')
     elif model_name == 'bert':
-        return Sbert(path='bert-base-chinese')
+        return Sbert(model_name_or_path='bert-base-chinese')
     elif model_name == 'bert_whitening':
         return BertWhitening(*args)
     elif model_name == 'simcse_':
         return SimCSEPipeLine()
     else:
-        return Sbert(path=model_name)
+        return Sbert(model_name_or_path=model_name)
 
 
 if __name__ == '__main__':
