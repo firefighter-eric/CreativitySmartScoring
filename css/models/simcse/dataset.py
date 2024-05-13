@@ -24,7 +24,7 @@ class CSSDataSet(Dataset):
 
     @staticmethod
     def load_data():
-        df = pd.read_csv('C:\Projects\CreativitySmartScoring\data\床单_raters.csv')
+        df = pd.read_csv('/data/床单_raters.csv')
         data = sorted(set(df['用途'].to_list()))
         data = [[_, _] for _ in data]
         return data

@@ -3,9 +3,9 @@ import random
 import torch
 from torch.utils.data import DataLoader
 
-from src.simcse.args import ModelArgs
-from src.simcse.dataset import CSSDataSet
-from src.simcse.modeling import Tokenizer
+from css.models.simcse.args import ModelArgs
+from css.models.simcse.dataset import CSSDataSet
+from css.models.simcse.modeling import Tokenizer
 
 train_dataset = CSSDataSet(split='train')
 dev_dataset = CSSDataSet(split='dev')

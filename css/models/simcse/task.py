@@ -5,9 +5,9 @@ from torch.nn import functional as F
 from torch.optim.lr_scheduler import LambdaLR
 from transformers.models.bert.modeling_bert import BertLMPredictionHead
 
-from src.simcse.args import TrainArgs, ModelArgs
-from src.simcse.modeling import Encoder
-from src import metric
+from css import metric
+from css.models.simcse.args import TrainArgs, ModelArgs
+from css.models.simcse.modeling import Encoder
 
 
 class CSETask(pl.LightningModule):

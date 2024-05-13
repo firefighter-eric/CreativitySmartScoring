@@ -5,12 +5,10 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-import envs
-
 if __name__ == '__main__':
     # config
-    data_path = f'{envs.project_path}/data'
-    out_path = f'{envs.project_path}/outputs'
+    data_path = 'data'
+    out_path = 'outputs'
 
     parser = ArgumentParser()
     parser.add_argument('--input_file', default='pku_out.csv')
@@ -42,7 +40,7 @@ if __name__ == '__main__':
     df_out['SubID'] = sub_ids
     for column, v in data.items():
         _v = [v[_] for _ in sub_ids]
-        arr = [sum(_)/len(_) if _ else np.nan for _ in _v]
+        arr = [sum(_) / len(_) if _ else np.nan for _ in _v]
         df_out[column] = arr
 
     df_out.to_csv(out_file_path, index=False)
