@@ -1,9 +1,10 @@
+from os.path import join
+
+import pandas as pd
 from sentence_transformers import util
 from tqdm import tqdm
 
-from css.get_model import get_model
-import pandas as pd
-from os.path import join
+from css.models.get_model import get_model
 
 
 def mean_distance(arr):
@@ -19,6 +20,7 @@ def mean_distance(arr):
                 c += 1
 
     return float(s / c)
+
 
 in_path = 'data/sjm_DAT_260.csv'
 df = pd.read_csv(in_path)

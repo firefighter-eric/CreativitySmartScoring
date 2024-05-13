@@ -1,5 +1,4 @@
 from sklearn.cluster import AgglomerativeClustering
-import numpy as np
 
 
 def get_cluster(x):

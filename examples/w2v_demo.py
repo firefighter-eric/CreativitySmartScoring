@@ -1,7 +1,7 @@
 import numpy as np
+import pandas as pd
 from gensim.models import KeyedVectors
 from loguru import logger
-import pandas as pd
 
 # %%
 file_path = 'data/models/word2vec/tencent-ailab-embedding-zh-d100-v0.2.0-s.txt'
@@ -26,8 +26,6 @@ df = pd.read_excel('data/word_association/dataT1.xlsx', sheet_name='assocations'
 
 tmp = '桌子'
 
-
-
 columns = [f'Table{i}' for i in range(1, 20)]
 
 df = df[columns]
@@ -46,6 +44,7 @@ def func1(row: pd.Series, first_token='桌子'):
         sims.append(s)
     return sims
 
+
 def func2(row: pd.Series, first_token='桌子'):
     row = [first_token] + row.tolist()
     sims = []
@@ -61,7 +60,7 @@ def func2(row: pd.Series, first_token='桌子'):
     return sims_mean
 
 
-s_columns = [f's_{i+1}' for i in range(len(columns))]
+s_columns = [f's_{i + 1}' for i in range(len(columns))]
 df[s_columns] = df.apply(func1, axis=1, result_type='expand')
 
 df['s_mean'] = df[s_columns].apply(lambda x: np.nanmean(x))

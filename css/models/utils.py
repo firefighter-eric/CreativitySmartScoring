@@ -8,4 +8,3 @@ def remove_stopwords(item, usage):
         return re.sub(item, '', usage)
     else:
         return usage
-

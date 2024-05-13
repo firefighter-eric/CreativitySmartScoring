@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 from torch import nn
 from transformers import AutoModel, BertTokenizer
 
-from css import bert_whitening_utils as utils
+from css.models import bert_whitening_utils as utils
 
 
 class Word2VectorFastText:
@@ -85,7 +85,7 @@ class SimCSE(nn.Module):
 
 class SimCSEPipeLine:
     def __init__(self):
-        self.tokenizer = BertTokenizer.from_pretrained('../data/models/chinese_roberta_wwm_ext_pytorch')
+        self.tokenizer = BertTokenizer.from_pretrained('../../data/models/chinese_roberta_wwm_ext_pytorch')
         self.model = SimCSE('../models/chinese_roberta_wwm_ext_pytorch', pooling='cls')
         self.model.cuda().eval()
 

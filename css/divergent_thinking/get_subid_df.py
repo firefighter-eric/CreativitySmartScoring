@@ -5,7 +5,6 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-
 if __name__ == '__main__':
     # config
     data_path = 'data'
@@ -41,7 +40,7 @@ if __name__ == '__main__':
     df_out['SubID'] = sub_ids
     for column, v in data.items():
         _v = [v[_] for _ in sub_ids]
-        arr = [sum(_)/len(_) if _ else np.nan for _ in _v]
+        arr = [sum(_) / len(_) if _ else np.nan for _ in _v]
         df_out[column] = arr
 
     df_out.to_csv(out_file_path, index=False)

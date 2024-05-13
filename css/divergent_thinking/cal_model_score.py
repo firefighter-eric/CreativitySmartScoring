@@ -7,8 +7,8 @@ import pandas as pd
 from sentence_transformers import util
 
 from css import metric
-from css.get_model import get_model
-from css.utils import remove_stopwords
+from css.models.get_model import get_model
+from css.models.utils import remove_stopwords
 
 
 def get_cos_sim(model, target, sents):

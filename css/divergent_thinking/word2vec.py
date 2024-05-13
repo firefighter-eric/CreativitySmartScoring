@@ -1,4 +1,3 @@
-import fasttext
 from fasttext import util, FastText
 
 model = FastText.load_model('C:\Projects\CreativitySmartScoring\models\word2vec\cc.zh.300.bin')
