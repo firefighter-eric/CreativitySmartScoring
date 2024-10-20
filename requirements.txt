@@ -11,6 +11,7 @@ scipy==1.12.0
 torch
 transformers
 sentence-transformers
+matplotlib
 
 loguru
 
