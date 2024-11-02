@@ -1,33 +1,41 @@
 import random
+from collections import defaultdict
+from itertools import chain
 from pprint import pprint
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
 # %%
 df_words = pd.read_excel('data/association_task/最终名词表.xlsx')
 words = df_words['词语'].to_list()
+n_words = len(words)
 
 # %%
 # git lfs clone https://huggingface.co/BAAI/bge-large-zh-v1.5
 model = SentenceTransformer(r"H:\models\BAAI\bge-large-zh-v1.5").cuda()
-
+logger.info(f'{model=} loaded')
 # %%
 embeddings = model.encode(words)
 scores = embeddings @ embeddings.T
-scores_list = scores.reshape(-1, ).tolist()
 
 # %% hist
 # from matplotlib import pyplot as plt
 # plt.hist(scores_list, bins=10)
 # plt.show()
-
-scores_list.sort()
-n_scores = len(scores_list)
+score_list = []
+scores_ = scores.tolist()
+for i in range(n_words):
+    for j in range(i + 1, n_words):
+        s = scores_[i][j]
+        score_list.append(s)
+score_list.sort()
+n_scores = len(score_list)
 score_bin_dict = {}
-for s in tqdm(scores_list):
+for s in tqdm(score_list):
     s = min(s, 1)
     s = max(s, 0)
     min_s = int(s * 10) / 10
@@ -37,17 +45,16 @@ for s in tqdm(scores_list):
 pprint(score_bin_dict)
 
 """
-{'[0.0<0.1)': 18,
- '[0.1<0.2)': 37892,
- '[0.2<0.3)': 2528218,
- '[0.3<0.4)': 10629662,
- '[0.4<0.5)': 6858682,
- '[0.5<0.6)': 1197546,
- '[0.6<0.7)': 122404,
- '[0.7<0.8)': 17578,
- '[0.8<0.9)': 2958,
- '[0.9<1.0)': 2200,
- '[1.0<1.1)': 2718}
+{'[0.0<0.1)': 9,
+ '[0.1<0.2)': 18946,
+ '[0.2<0.3)': 1264109,
+ '[0.3<0.4)': 5314831,
+ '[0.4<0.5)': 3429341,
+ '[0.5<0.6)': 598773,
+ '[0.6<0.7)': 61202,
+ '[0.7<0.8)': 8789,
+ '[0.8<0.9)': 1479,
+ '[0.9<1.0)': 146}
 """
 
 
@@ -57,43 +64,56 @@ pprint(score_bin_dict)
 def get_clusters(scores: np.ndarray, n_words_per_cluster, n_clusters, min_s, max_s) -> list[dict]:
     index_list = np.where((scores >= min_s) & (scores < max_s))
     index_list = [(x, y) for x, y in zip(index_list[0], index_list[1])]
-    cluster_index_results = set()
-    cluster_scores = []
-    cluster_words = []
-    for i in tqdm(range(n_clusters)):
-        while True:
-            result = get_one_cluster(index_list=index_list, n_words_per_cluster=n_words_per_cluster)
-            if result in cluster_index_results:
-                continue
-
-            score = [scores[i, j] for i in result for j in result]
-            word = [words[i] for i in result]
-            cluster_index_results.add(result)
-            cluster_scores.append(score)
-            cluster_words.append(word)
-            break
+    index_map = defaultdict(set)
+    for x, y in index_list:
+        if x == y:
+            continue
+        index_map[x].add(y)
 
     output = []
-    for i in range(n_clusters):
-        output.append({
-            'score': cluster_scores[i],
-            'words': cluster_words[i]
-        })
+    cluster_index_results = set()
+    for i in tqdm(range(n_clusters), desc= f'{n_words_per_cluster=} {min_s=} {max_s=}'):
+        while True:
+            result = get_one_cluster(index_map=index_map, n_words_per_cluster=n_words_per_cluster)
+            if result in cluster_index_results or len(result) < n_words_per_cluster:
+                continue
+
+            score_matrix = [[scores[i, j] for i in result] for j in result]
+            word = [words[i] for i in result]
+            score_upper = []
+            for i in range(n_words_per_cluster):
+                for j in range(i + 1, n_words_per_cluster):
+                    score_upper.append(score_matrix[i][j])
+            score_average = np.mean(score_upper)
+            score_std = np.std(score_upper)
+            cluster_index_results.add(result)
+
+            output.append({
+                'scores': list(chain(*score_matrix)),
+                'words': word,
+                'score_average': score_average,
+                'score_std': score_std,
+            })
+            break
+
     return output
 
 
-def get_one_cluster(index_list, n_words_per_cluster) -> tuple:
+def get_one_cluster(index_map, n_words_per_cluster) -> tuple:
     result = set()
     while len(result) < n_words_per_cluster:
         if not result:
-            candidates = index_list
+            candidates = list(index_map.keys())
         else:
-            candidates = [_ for _ in index_list if _[0] in result]
+            # candidates = [_ for _ in index_list if _[0] in result]
+            candidates = set(index_map.keys())
+            for r in result:
+                candidates = candidates & index_map[r]
+            candidates = list(candidates)
         if not candidates:
             break
         item = random.choice(candidates)
-        result.add(item[0])
-        result.add(item[1])
+        result.add(item)
     result = tuple(result)
     return result
 
@@ -107,15 +127,17 @@ pprint(r)
 
 # %%
 
+random.seed(42)
 n_clusters = 100
-for n_words_per_cluster in [4, 5]:
+for n_words_per_cluster in [3, 4, 5]:
     for min_s, max_s in [(0.0, 0.3), (0.3, 0.6), (0.6, 1.0)]:
         r = get_clusters(scores, n_words_per_cluster, n_clusters, min_s, max_s)
         filename = f'{n_clusters=}{n_words_per_cluster=}{min_s=}{max_s=}'
         columns = ([f'W{i}' for i in range(n_words_per_cluster)] +
+                   ['score_average', 'score_std'] +
                    [f'S{i}{j}' for i in range(n_words_per_cluster) for j in range(n_words_per_cluster)])
         df = pd.DataFrame(columns=columns)
 
         for i in range(n_clusters):
-            df.loc[i] = r[i]['words'] + r[i]['score']
+            df.loc[i] = r[i]['words'] + [r[i]['score_average']] + [r[i]['score_std']] + r[i]['scores']
         df.to_csv(f'data/association_task/{filename}.csv', index=False, encoding='utf-8-sig')
