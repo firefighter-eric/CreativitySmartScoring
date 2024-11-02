@@ -59,6 +59,34 @@ pprint(score_bin_dict)
 
 
 # %%
+def describe_upper_matrix(x):
+    """
+    upper_matrix
+    0111
+    0011
+    0001
+    0000
+    :param x:
+    :return:
+    """
+    if isinstance(x, np.ndarray):
+        x = x.tolist()
+    h, w = len(x), len(x[0])
+    score_upper = []
+    for i in range(h):
+        for j in range(i + 1, w):
+            score_upper.append(x[i][j])
+    average = np.mean(score_upper)
+    std = np.std(score_upper)
+    # print(f'{h=} {w=} {len(score_upper)=} {average:.4f}±{std:.4f}')
+    return {'average': average, 'std': std, 'n': len(score_upper), 'h': h, 'w': w}
+
+
+total_stat = describe_upper_matrix(scores)
+pprint(total_stat)
+
+
+# %%
 
 
 def get_clusters(scores: np.ndarray, n_words_per_cluster, n_clusters, min_s, max_s) -> list[dict]:
@@ -72,7 +100,7 @@ def get_clusters(scores: np.ndarray, n_words_per_cluster, n_clusters, min_s, max
 
     output = []
     cluster_index_results = set()
-    for i in tqdm(range(n_clusters), desc= f'{n_words_per_cluster=} {min_s=} {max_s=}'):
+    for i in tqdm(range(n_clusters), desc=f'{n_words_per_cluster=} {min_s=} {max_s=}'):
         while True:
             result = get_one_cluster(index_map=index_map, n_words_per_cluster=n_words_per_cluster)
             if result in cluster_index_results or len(result) < n_words_per_cluster:
@@ -80,19 +108,14 @@ def get_clusters(scores: np.ndarray, n_words_per_cluster, n_clusters, min_s, max
 
             score_matrix = [[scores[i, j] for i in result] for j in result]
             word = [words[i] for i in result]
-            score_upper = []
-            for i in range(n_words_per_cluster):
-                for j in range(i + 1, n_words_per_cluster):
-                    score_upper.append(score_matrix[i][j])
-            score_average = np.mean(score_upper)
-            score_std = np.std(score_upper)
+            stat = describe_upper_matrix(score_matrix)
             cluster_index_results.add(result)
 
             output.append({
                 'scores': list(chain(*score_matrix)),
                 'words': word,
-                'score_average': score_average,
-                'score_std': score_std,
+                'score_average': stat['average'],
+                'score_std': stat['std'],
             })
             break
 
